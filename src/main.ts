@@ -1,35 +1,34 @@
-import { Assets, Application, Container, GraphicsContext, Graphics, Sprite, Text } from 'pixi.js';
-import gsap from 'gsap';
+import { Assets, Application, Container, GraphicsContext, Graphics, Sprite, Text } from "pixi.js";
+import gsap from "gsap";
 
-import { animateToPosition } from './utils/animations';
-import { getRandomNumber } from './utils/randnumber';
+import { animateToPosition } from "./utils/animations";
+import { getRandomNumber } from "./utils/randnumber";
 
 (async () => {
-  // Create a new application
   const app = new Application();
 
-  // Initialize the application
-  await app.init({ background: '#0f010fff', antialias: true, resizeTo: window });
+  await app.init({ background: "#0f010fff", antialias: true, resizeTo: window });
+  app.resizeTo = window;
 
-  // Append the application canvas to the document body
   document.body.appendChild(app.canvas);
 
-  // Load the image
-  const foolTexture = await Assets.load('/assets/fool.png');
-  const moonTexture = await Assets.load('/assets/moon.png');
-  const justiceTexture = await Assets.load('/assets/justice.png');
-  const wheelOfFortuneTexture = await Assets.load('/assets/wheeloffortune.png');
-  const magicianTexture = await Assets.load('/assets/magician.png');
-  const hermitTexture = await Assets.load('/assets/hermit.png');
+  // Load images
+  const foolTexture = await Assets.load("/assets/fool.png");
+  const moonTexture = await Assets.load("/assets/moon.png");
+  const justiceTexture = await Assets.load("/assets/justice.png");
+  const wheelOfFortuneTexture = await Assets.load("/assets/wheeloffortune.png");
+  const magicianTexture = await Assets.load("/assets/magician.png");
+  const hermitTexture = await Assets.load("/assets/hermit.png");
 
-  const backTexture = await Assets.load('/assets/back.png');
-  const backTextureRare = await Assets.load('/assets/back-alternate.png');
+  const backTexture = await Assets.load("/assets/back.png");
+  const backTextureRare = await Assets.load("/assets/back-alternate.png");
 
   // Create and add a container to the stage
   const container = new Container();
 
   app.stage.addChild(container);
 
+  // SETUP
   // Grid dimensions
   const gridWidth = 3;
   const spacingX = 18;
@@ -40,34 +39,31 @@ import { getRandomNumber } from './utils/randnumber';
   const cardWidth = 305;
 
   const cards = [
-    { label: 'The Fool', texture: foolTexture },
-    { label: 'The Hermit', texture: hermitTexture },
-    { label: 'The Moon', texture: moonTexture },
-    { label: 'Justice', texture: justiceTexture },
-    { label: 'The Magician', texture: magicianTexture },
-    { label: 'Wheel of Fortune', texture: wheelOfFortuneTexture }
+    { label: "The Fool", texture: foolTexture },
+    { label: "The Hermit", texture: hermitTexture },
+    { label: "The Moon", texture: moonTexture },
+    { label: "Justice", texture: justiceTexture },
+    { label: "The Magician", texture: magicianTexture },
+    { label: "Wheel of Fortune", texture: wheelOfFortuneTexture }
   ];
 
   // Create a grid of cards in the container
   const frontContext = new GraphicsContext()
     .roundRect(0, 0, cardWidth, cardHeight, 16)
-    .fill('#f2ebe2')
+    .fill("#f2ebe2")
     .roundRect(10, 10, (cardWidth - 20), (cardHeight - 20), 10)
     .stroke({ color: 0x000000, width: 2, alpha: 1, alignment: 0.5 });
 
   const backContext = new GraphicsContext()
     .roundRect(0, 0, cardWidth, cardHeight, 16)
-    .fill('#301934');
+    .fill("#301934");
 
   interface GridInfo {
     initialX: number;
     initialY: number;
   }
 
-  const gridInfo: GridInfo[] = [];
-
-  // store the cards in an array
-  let cardsInfo: {
+  interface CardInfo {
     card: Container;
     initialSlot: number;
     currentSlot: number;
@@ -77,7 +73,10 @@ import { getRandomNumber } from './utils/randnumber';
     dragStartX: number;
     dragStartY: number;
     isFlipped: boolean;
-  }[] = [];
+  }
+
+  const gridInfo: GridInfo[] = [];
+  let cardsInfo: CardInfo[] = [];
 
   for (let i = 0; i < cards.length; i++) {
     const { texture, label: cardLabel } = cards[i];
@@ -86,7 +85,6 @@ import { getRandomNumber } from './utils/randnumber';
     const front = new Graphics(frontContext);
     const back = new Graphics(backContext);
 
-    // The sprite should be be resized to not bleed under labels
     const frontSprite = new Sprite(texture);
     frontSprite.anchor.set(0);
     frontSprite.x = 11;
@@ -103,6 +101,8 @@ import { getRandomNumber } from './utils/randnumber';
     }
 
     const backSprite = new Sprite(backTextureImg);
+
+    // center the back sprite to the card
     backSprite.anchor.set(0.5);
     backSprite.x = cardWidth / 2;
     backSprite.y = cardHeight / 2;
@@ -115,7 +115,7 @@ import { getRandomNumber } from './utils/randnumber';
     // Start with back hidden
     back.visible = false;
 
-    // Create a mask for the card avoiding image overflow - this might not be necessary if the image is already sized correctly and we might want a slight underglow
+    // Create a mask for the card avoiding image overflow - useful for the back card
     const mask = new Graphics();
     mask.roundRect(0, 0, cardWidth, cardHeight, 16);
     mask.fill(0xffffff);
@@ -131,11 +131,12 @@ import { getRandomNumber } from './utils/randnumber';
 
     frontSprite.mask = frontMask;
 
-    // Add the card title
+    // Add the card name
     front.addChild(frontMask);
     const label = new Text({
       text: cardLabel,
-      style: { fontFamily: 'Cardo', fontSize: 32, fill: '#111222' }
+      rotation: (Math.random() - 0.5) * 0.0025,
+      style: { fontFamily: "Cardo", fontSize: 32, fill: "#111222" }
     });
 
     // Center the label
@@ -180,14 +181,14 @@ import { getRandomNumber } from './utils/randnumber';
     })
 
     // Allow the card to be interactive
-    card.eventMode = 'static';
-    card.cursor = 'pointer';
+    card.eventMode = "static";
+    card.cursor = "pointer";
 
     // Set the initial scale
     let targetScale = 1;
 
     // Add pointer events for hover
-    card.on('pointerover', () => {
+    card.on("pointerover", () => {
       targetScale = 1.035;
       card.zIndex = 2;
 
@@ -206,7 +207,7 @@ import { getRandomNumber } from './utils/randnumber';
       });
     });
 
-    card.on('pointerout', () => {
+    card.on("pointerout", () => {
       targetScale = 1;
       card.zIndex = 1;
 
@@ -225,7 +226,7 @@ import { getRandomNumber } from './utils/randnumber';
       });
     });
 
-    card.on('pointertap', () => {
+    card.on("pointertap", () => {
       const info = cardsInfo[i];
 
       if (!info.isDragging) {
@@ -244,7 +245,7 @@ import { getRandomNumber } from './utils/randnumber';
     });
 
     // dragging logic
-    card.on('pointerdown', (event) => {
+    card.on("pointerdown", (event) => {
       const localPos = container.toLocal(event.global);
 
       const info = cardsInfo[i];
@@ -255,7 +256,7 @@ import { getRandomNumber } from './utils/randnumber';
       container.setChildIndex(card, container.children.length - 1);
     });
 
-    card.on('pointermove', (event) => {
+    card.on("pointermove", (event) => {
       if (event.buttons === 0) return;
 
       const localPos = container.toLocal(event.global);
@@ -267,12 +268,12 @@ import { getRandomNumber } from './utils/randnumber';
       const dy = newCardY - info.originalY;
       const distance = Math.sqrt(dx * dx + dy * dy);
 
-      // move the card even if we won't trigger a drag
+      // move the card even if we won"t trigger a drag
       card.x = newCardX;
       card.y = newCardY;
 
-      // if card move more than 5px set dragging to true, this will prevent the flip
-      if (distance > 5) {
+      // if card move more than 12px set dragging to true, this will prevent the flip
+      if (distance > 12) {
         info.isDragging = true;
       }
     });
@@ -294,7 +295,7 @@ import { getRandomNumber } from './utils/randnumber';
           const draggedSlot = draggedInfo.currentSlot;
           const otherSlot = otherInfo.currentSlot;
 
-          // Animate cards to each other's slot positions
+          // Animate cards to each other"s slot positions
           animateToPosition(draggedInfo.card, gridInfo[otherSlot].initialX, gridInfo[otherSlot].initialY, 300);
           animateToPosition(otherInfo.card, gridInfo[draggedSlot].initialX, gridInfo[draggedSlot].initialY, 300);
 
@@ -307,35 +308,41 @@ import { getRandomNumber } from './utils/randnumber';
         }
       }
 
-      // No nearby card: snap back to original position
+      // No nearby cards snap back to original position
       if (!swapped) {
         const slot = draggedInfo.currentSlot;
         const { initialX, initialY } = gridInfo[slot];
         animateToPosition(card, initialX, initialY, 300);
       }
 
-      // reset isDragging
+      // reset isDragging / wait to prevent false positives
       setTimeout(() => {
         draggedInfo.isDragging = false;
       }, 5);
     }
 
-    card.on('pointerup', () => {
+    card.on("pointerup", () => {
       endDrag(card);
     });
 
-    card.on('pointerupoutside', () => {
+    card.on("pointerupoutside", () => {
       endDrag(card);
     });
 
     container.addChild(card);
+    recenterContainer();
   }
 
-  // Get real bounds of container
-  const bounds = container.getLocalBounds();
+  function recenterContainer() {
+    const bounds = container.getLocalBounds();
+    container.pivot.set(bounds.width / 2, bounds.height / 2);
+    container.position.set(app.screen.width / 2, app.screen.height / 2);
+  }
 
-  // Center based on those bounds
-  container.pivot.set(bounds.width / 2, bounds.height / 2);
-  container.position.set(app.screen.width / 2, app.screen.height / 2);
+  window.addEventListener("resize", () => {
+    app.resize();
+    recenterContainer();
+  });
+
 
 })();
