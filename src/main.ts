@@ -257,24 +257,6 @@ import {
       });
     });
 
-    card.on("pointertap", () => {
-      const info = cardsInfo[i];
-
-      if (!info.isDragging) {
-        gsap.to(card.scale, {
-          x: 0,
-          duration: 0.15,
-          onComplete: () => {
-            info.isFlipped = !info.isFlipped;
-            frontWrapper.visible = !info.isFlipped;
-            backWrapper.visible = info.isFlipped;
-
-            gsap.to(card.scale, { x: 1, duration: 0.15 });
-          },
-        });
-      }
-    });
-
     // dragging logic
     card.on("pointerdown", (event) => {
       const localPos = container.toLocal(event.global);
@@ -299,13 +281,16 @@ import {
       const dy = newCardY - info.originalY;
       const distance = Math.sqrt(dx * dx + dy * dy);
 
-      // move the card even if we won"t trigger a drag
+      // Move the card
       card.x = newCardX;
       card.y = newCardY;
 
-      // if card move more than 12px set dragging to true, this will prevent the flip
-      if (distance > 12) {
+      if (distance > 8 && !info.isDragging) {
         info.isDragging = true;
+      }
+
+      // Visual feedback only after a threshold
+      if (distance > 12) {
         gsap.to(card, {
           alpha: 0.8,
           duration: 0.2,
@@ -320,6 +305,8 @@ import {
       const draggedInfo = cardsInfo.find((info) => info.card === card);
       if (!draggedInfo) return;
 
+      draggedInfo.isDragging = false;
+
       let swapped = false;
 
       for (const otherInfo of cardsInfo) {
@@ -332,7 +319,6 @@ import {
           const draggedSlot = draggedInfo.currentSlot;
           const otherSlot = otherInfo.currentSlot;
 
-          // Animate cards to each other"s slot positions
           animateToPosition(
             draggedInfo.card,
             gridInfo[otherSlot].initialX,
@@ -346,7 +332,6 @@ import {
             300,
           );
 
-          // Swap their slot tracking
           draggedInfo.currentSlot = otherSlot;
           otherInfo.currentSlot = draggedSlot;
 
@@ -355,26 +340,54 @@ import {
         }
       }
 
-      // No nearby cards snap back to original position
       if (!swapped) {
         const slot = draggedInfo.currentSlot;
         const { initialX, initialY } = gridInfo[slot];
         animateToPosition(card, initialX, initialY, 300);
       }
 
-      // reset isDragging / wait to prevent false positives
-      setTimeout(() => {
-        draggedInfo.isDragging = false;
-        gsap.to(card, {
-          alpha: 1,
-          duration: 0.3,
-          ease: "power2.out",
-        });
-        gsap.to(card.scale, { x: 1, y: 1, duration: 0.3 });
-      }, 5);
+      gsap.to(card, {
+        alpha: 1,
+        duration: 0.3,
+        ease: "power2.out",
+      });
+      gsap.to(card.scale, { x: 1, y: 1, duration: 0.3 });
     }
 
     card.on("pointerup", () => {
+      const info = cardsInfo[i];
+
+      // Check isDragging BEFORE calling endDrag
+      const wasDragging = info.isDragging;
+
+      if (wasDragging) {
+        // This was a drag - handle the drag end
+        endDrag(card);
+      } else {
+        // This was a click, not a drag - handle the flip
+        card.interactive = false;
+        gsap.to(card.scale, {
+          x: 0,
+          duration: 0.35,
+          onComplete: () => {
+            info.isFlipped = !info.isFlipped;
+            frontWrapper.visible = !info.isFlipped;
+            backWrapper.visible = info.isFlipped;
+
+            gsap.to(card.scale, {
+              x: 1,
+              duration: 0.35,
+              onComplete: () => {
+                card.interactive = true;
+              },
+            });
+          },
+        });
+      }
+    });
+
+    card.on("pointerupoutside", () => {
+      // Only handle drag end for outside events
       endDrag(card);
     });
 
