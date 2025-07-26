@@ -1,7 +1,8 @@
-import { Assets, Application, GraphicsContext, Container, Graphics, Text, Sprite } from 'pixi.js';
+import { Assets, Application, Container, GraphicsContext, Graphics, Sprite, Text } from 'pixi.js';
 import gsap from 'gsap';
 
 import { animateToPosition } from './utils/animations';
+import { getRandomNumber } from './utils/randnumber';
 
 (async () => {
   // Create a new application
@@ -21,7 +22,8 @@ import { animateToPosition } from './utils/animations';
   const magicianTexture = await Assets.load('/assets/magician.png');
   const hermitTexture = await Assets.load('/assets/hermit.png');
 
-  const backTexture = await Assets.load('/assets/back-alternate.png');
+  const backTexture = await Assets.load('/assets/back.png');
+  const backTextureRare = await Assets.load('/assets/back-alternate.png');
 
   // Create and add a container to the stage
   const container = new Container();
@@ -37,14 +39,14 @@ import { animateToPosition } from './utils/animations';
   const cardHeight = 550;
   const cardWidth = 305;
 
-  // the two next array could be merged
-  const cardLabels = [
-    'The Fool', 'The Hermit', 'The Moon', 'Justice', 'The Magician', 'Wheel of Fortune'
+  const cards = [
+    { label: 'The Fool', texture: foolTexture },
+    { label: 'The Hermit', texture: hermitTexture },
+    { label: 'The Moon', texture: moonTexture },
+    { label: 'Justice', texture: justiceTexture },
+    { label: 'The Magician', texture: magicianTexture },
+    { label: 'Wheel of Fortune', texture: wheelOfFortuneTexture }
   ];
-
-  const frontTexture = [
-    foolTexture, hermitTexture, moonTexture, justiceTexture, magicianTexture, wheelOfFortuneTexture
-  ]
 
   // Create a grid of cards in the container
   const frontContext = new GraphicsContext()
@@ -77,19 +79,30 @@ import { animateToPosition } from './utils/animations';
     isFlipped: boolean;
   }[] = [];
 
-  for (let i = 0; i < cardLabels.length; i++) {
+  for (let i = 0; i < cards.length; i++) {
+    const { texture, label: cardLabel } = cards[i];
+
     const card = new Container();
     const front = new Graphics(frontContext);
     const back = new Graphics(backContext);
 
     // The sprite should be be resized to not bleed under labels
-    const frontSprite = new Sprite(frontTexture[i]);
+    const frontSprite = new Sprite(texture);
     frontSprite.anchor.set(0);
     frontSprite.x = 11;
     frontSprite.y = 11;
     front.addChild(frontSprite);
 
-    const backSprite = new Sprite(backTexture);
+    // Allow for a random card to have the special backside.
+    const randBackNumber = getRandomNumber(1, 200);
+
+    let backTextureImg = backTexture;
+
+    if (randBackNumber === 200) {
+      backTextureImg = backTextureRare
+    }
+
+    const backSprite = new Sprite(backTextureImg);
     backSprite.anchor.set(0.5);
     backSprite.x = cardWidth / 2;
     backSprite.y = cardHeight / 2;
@@ -121,7 +134,7 @@ import { animateToPosition } from './utils/animations';
     // Add the card title
     front.addChild(frontMask);
     const label = new Text({
-      text: `${cardLabels[i]}`,
+      text: cardLabel,
       style: { fontFamily: 'Cardo', fontSize: 32, fill: '#111222' }
     });
 
@@ -258,8 +271,8 @@ import { animateToPosition } from './utils/animations';
       card.x = newCardX;
       card.y = newCardY;
 
-      // if card move more than 30px set dragging to true, this will prevent the flip
-      if (distance > 30) {
+      // if card move more than 5px set dragging to true, this will prevent the flip
+      if (distance > 5) {
         info.isDragging = true;
       }
     });
