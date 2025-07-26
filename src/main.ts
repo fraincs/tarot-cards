@@ -6,6 +6,7 @@ import {
   GraphicsContext,
   Sprite,
   Text,
+  Texture,
 } from "pixi.js";
 
 import gsap from "gsap";
@@ -38,9 +39,45 @@ import { getRandomNumber } from "./utils/randnumber";
   const backTexture = await Assets.load("/assets/main/back.png");
   const backTextureRare = await Assets.load("/assets/main/back-alternate.png");
 
+  // Set Background gradient
+  function createRadialGradientTexture(width: number, height: number): Texture {
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext("2d")!;
+
+    const centerX = width / 2;
+    const centerY = height / 2;
+    const radius = Math.max(width, height) / 2;
+
+    const gradient = ctx.createRadialGradient(
+      centerX,
+      centerY,
+      0,
+      centerX,
+      centerY,
+      radius,
+    );
+    gradient.addColorStop(0, "#55305eff"); // Center color
+    gradient.addColorStop(1, "#120110ff"); // Outer color
+
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, width, height);
+
+    return Texture.from(canvas);
+  }
+
   // Create and add a container to the stage
   const container = new Container();
+  const backgroundContainer = new Container();
+  const bgTexture = createRadialGradientTexture(
+    window.innerWidth,
+    window.innerHeight,
+  );
+  const bgSprite = new Sprite(bgTexture);
+  backgroundContainer.addChild(bgSprite);
 
+  app.stage.addChild(backgroundContainer);
   app.stage.addChild(container);
 
   // SETUP
@@ -377,8 +414,21 @@ import { getRandomNumber } from "./utils/randnumber";
     container.position.set(app.screen.width / 2, app.screen.height / 2);
   }
 
+  function regenerateBackground() {
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+
+    const newTexture = createRadialGradientTexture(width, height);
+    bgSprite.texture = newTexture;
+    bgSprite.width = width;
+    bgSprite.height = height;
+
+    app.renderer.resize(width, height);
+  }
+
   window.addEventListener("resize", () => {
     app.resize();
     recenterContainer();
+    regenerateBackground();
   });
 })();
