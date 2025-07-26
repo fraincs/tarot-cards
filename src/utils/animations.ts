@@ -7,7 +7,7 @@ export function animateToPosition(
   targetY: number,
   baseDuration: number = 300,
   minDuration: number = 200,
-  maxDuration: number = 1000
+  maxDuration: number = 1000,
 ): void {
   // Calculate distance
   const dx = targetX - sprite.x;
@@ -19,13 +19,13 @@ export function animateToPosition(
   const durationScale = Math.min(distance / maxDistance, 1);
   const adjustedDuration = Math.max(
     minDuration,
-    Math.min(maxDuration, baseDuration * durationScale)
+    Math.min(maxDuration, baseDuration * durationScale),
   );
 
   gsap.to(sprite, {
     x: targetX,
     y: targetY,
     duration: adjustedDuration / 1000,
-    ease: "power2.out"
+    ease: "power2.out",
   });
 }

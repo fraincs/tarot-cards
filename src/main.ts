@@ -1,4 +1,12 @@
-import { Assets, Application, Container, GraphicsContext, Graphics, Sprite, Text } from "pixi.js";
+import {
+  Assets,
+  Application,
+  Container,
+  Graphics,
+  GraphicsContext,
+  Sprite,
+  Text,
+} from "pixi.js";
 import gsap from "gsap";
 
 import { animateToPosition } from "./utils/animations";
@@ -7,7 +15,11 @@ import { getRandomNumber } from "./utils/randnumber";
 (async () => {
   const app = new Application();
 
-  await app.init({ background: "#0f010fff", antialias: true, resizeTo: window });
+  await app.init({
+    background: "#0f010fff",
+    antialias: true,
+    resizeTo: window,
+  });
   app.resizeTo = window;
 
   document.body.appendChild(app.canvas);
@@ -44,14 +56,14 @@ import { getRandomNumber } from "./utils/randnumber";
     { label: "The Moon", texture: moonTexture },
     { label: "Justice", texture: justiceTexture },
     { label: "The Magician", texture: magicianTexture },
-    { label: "Wheel of Fortune", texture: wheelOfFortuneTexture }
+    { label: "Wheel of Fortune", texture: wheelOfFortuneTexture },
   ];
 
   // Create a grid of cards in the container
   const frontContext = new GraphicsContext()
     .roundRect(0, 0, cardWidth, cardHeight, 16)
     .fill("#f2ebe2")
-    .roundRect(10, 10, (cardWidth - 20), (cardHeight - 20), 10)
+    .roundRect(10, 10, cardWidth - 20, cardHeight - 20, 10)
     .stroke({ color: 0x000000, width: 2, alpha: 1, alignment: 0.5 });
 
   const backContext = new GraphicsContext()
@@ -76,7 +88,7 @@ import { getRandomNumber } from "./utils/randnumber";
   }
 
   const gridInfo: GridInfo[] = [];
-  let cardsInfo: CardInfo[] = [];
+  const cardsInfo: CardInfo[] = [];
 
   for (let i = 0; i < cards.length; i++) {
     const { texture, label: cardLabel } = cards[i];
@@ -97,7 +109,7 @@ import { getRandomNumber } from "./utils/randnumber";
     let backTextureImg = backTexture;
 
     if (randBackNumber === 200) {
-      backTextureImg = backTextureRare
+      backTextureImg = backTextureRare;
     }
 
     const backSprite = new Sprite(backTextureImg);
@@ -136,7 +148,7 @@ import { getRandomNumber } from "./utils/randnumber";
     const label = new Text({
       text: cardLabel,
       rotation: (Math.random() - 0.5) * 0.0025,
-      style: { fontFamily: "Cardo", fontSize: 32, fill: "#111222" }
+      style: { fontFamily: "Cardo", fontSize: 32, fill: "#111222" },
     });
 
     // Center the label
@@ -164,7 +176,7 @@ import { getRandomNumber } from "./utils/randnumber";
     // Store the grid info for this card
     gridInfo.push({
       initialX: card.x,
-      initialY: card.y
+      initialY: card.y,
     });
 
     // store the card position
@@ -178,7 +190,7 @@ import { getRandomNumber } from "./utils/randnumber";
       dragStartX: 0,
       dragStartY: 0,
       isFlipped: false,
-    })
+    });
 
     // Allow the card to be interactive
     card.eventMode = "static";
@@ -197,13 +209,13 @@ import { getRandomNumber } from "./utils/randnumber";
         x: targetScale,
         y: targetScale,
         duration: 0.3,
-        ease: "power2.out"
+        ease: "power2.out",
       });
 
       gsap.to(card, {
         rotation: (Math.random() - 0.5) * 0.1,
         duration: 0.3,
-        ease: "power2.out"
+        ease: "power2.out",
       });
     });
 
@@ -216,13 +228,13 @@ import { getRandomNumber } from "./utils/randnumber";
         x: targetScale,
         y: targetScale,
         duration: 0.3,
-        ease: "power2.out"
+        ease: "power2.out",
       });
 
       gsap.to(card, {
         rotation: 0,
         duration: 0.3,
-        ease: "power2.out"
+        ease: "power2.out",
       });
     });
 
@@ -280,8 +292,8 @@ import { getRandomNumber } from "./utils/randnumber";
 
     // End dragging logic
     function endDrag(card: Container) {
-      const draggedInfo = cardsInfo.find(info => info.card === card);
-      if (!draggedInfo) return;;
+      const draggedInfo = cardsInfo.find((info) => info.card === card);
+      if (!draggedInfo) return;
 
       let swapped = false;
 
@@ -296,8 +308,18 @@ import { getRandomNumber } from "./utils/randnumber";
           const otherSlot = otherInfo.currentSlot;
 
           // Animate cards to each other"s slot positions
-          animateToPosition(draggedInfo.card, gridInfo[otherSlot].initialX, gridInfo[otherSlot].initialY, 300);
-          animateToPosition(otherInfo.card, gridInfo[draggedSlot].initialX, gridInfo[draggedSlot].initialY, 300);
+          animateToPosition(
+            draggedInfo.card,
+            gridInfo[otherSlot].initialX,
+            gridInfo[otherSlot].initialY,
+            300,
+          );
+          animateToPosition(
+            otherInfo.card,
+            gridInfo[draggedSlot].initialX,
+            gridInfo[draggedSlot].initialY,
+            300,
+          );
 
           // Swap their slot tracking
           draggedInfo.currentSlot = otherSlot;
@@ -343,6 +365,4 @@ import { getRandomNumber } from "./utils/randnumber";
     app.resize();
     recenterContainer();
   });
-
-
 })();
