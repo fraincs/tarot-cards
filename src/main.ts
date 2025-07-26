@@ -25,15 +25,17 @@ import { getRandomNumber } from "./utils/randnumber";
   document.body.appendChild(app.canvas);
 
   // Load images
-  const foolTexture = await Assets.load("/assets/fool.png");
-  const moonTexture = await Assets.load("/assets/moon.png");
-  const justiceTexture = await Assets.load("/assets/justice.png");
-  const wheelOfFortuneTexture = await Assets.load("/assets/wheeloffortune.png");
-  const magicianTexture = await Assets.load("/assets/magician.png");
-  const hermitTexture = await Assets.load("/assets/hermit.png");
+  const foolTexture = await Assets.load("/assets/main/fool.png");
+  const moonTexture = await Assets.load("/assets/main/moon.png");
+  const justiceTexture = await Assets.load("/assets/main/justice.png");
+  const wheelOfFortuneTexture = await Assets.load(
+    "/assets/main/wheeloffortune.png",
+  );
+  const magicianTexture = await Assets.load("/assets/main/magician.png");
+  const hermitTexture = await Assets.load("/assets/main/hermit.png");
 
-  const backTexture = await Assets.load("/assets/back.png");
-  const backTextureRare = await Assets.load("/assets/back-alternate.png");
+  const backTexture = await Assets.load("/assets/main/back.png");
+  const backTextureRare = await Assets.load("/assets/main/back-alternate.png");
 
   // Create and add a container to the stage
   const container = new Container();
