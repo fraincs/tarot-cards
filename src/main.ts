@@ -7,6 +7,7 @@ import {
   Sprite,
   Text,
 } from "pixi.js";
+
 import gsap from "gsap";
 
 import { animateToPosition } from "./utils/animations";
@@ -290,6 +291,12 @@ import { getRandomNumber } from "./utils/randnumber";
       // if card move more than 12px set dragging to true, this will prevent the flip
       if (distance > 12) {
         info.isDragging = true;
+        gsap.to(card, {
+          alpha: 0.8,
+          duration: 0.2,
+          ease: "power2.out",
+        });
+        gsap.to(card.scale, { x: 0.95, y: 0.95, duration: 0.3 });
       }
     });
 
@@ -343,6 +350,12 @@ import { getRandomNumber } from "./utils/randnumber";
       // reset isDragging / wait to prevent false positives
       setTimeout(() => {
         draggedInfo.isDragging = false;
+        gsap.to(card, {
+          alpha: 1,
+          duration: 0.3,
+          ease: "power2.out",
+        });
+        gsap.to(card.scale, { x: 1, y: 1, duration: 0.3 });
       }, 5);
     }
 
