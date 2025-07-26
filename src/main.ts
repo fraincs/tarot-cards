@@ -248,26 +248,26 @@ import { animateToPosition } from './utils/animations';
       const localPos = container.toLocal(event.global);
       const info = cardsInfo[i];
 
-      console.log(localPos.x);
-      console.log(info.dragStartX);
+      const newCardX = localPos.x - info.dragStartX;
+      const newCardY = localPos.y - info.dragStartY;
+      const dx = newCardX - info.originalX;
+      const dy = newCardY - info.originalY;
+      const distance = Math.sqrt(dx * dx + dy * dy);
 
-      const dx = localPos.x - (card.x + info.dragStartX);
-      const dy = localPos.y - (card.y + info.dragStartY);
+      // move the card even if we won't trigger a drag
+      card.x = newCardX;
+      card.y = newCardY;
 
-      if (Math.sqrt(dx * dx + dy * dy) > 5) {
+      // if card move more than 30px set dragging to true, this will prevent the flip
+      if (distance > 30) {
         info.isDragging = true;
-
-        card.x = localPos.x - info.dragStartX;
-        card.y = localPos.y - info.dragStartY;
       }
     });
 
     // End dragging logic
     function endDrag(card: Container) {
       const draggedInfo = cardsInfo.find(info => info.card === card);
-      if (!draggedInfo) return;
-
-      draggedInfo.isDragging = false;
+      if (!draggedInfo) return;;
 
       let swapped = false;
 
@@ -300,6 +300,11 @@ import { animateToPosition } from './utils/animations';
         const { initialX, initialY } = gridInfo[slot];
         animateToPosition(card, initialX, initialY, 300);
       }
+
+      // reset isDragging
+      setTimeout(() => {
+        draggedInfo.isDragging = false;
+      }, 5);
     }
 
     card.on('pointerup', () => {
