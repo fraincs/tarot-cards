@@ -96,38 +96,39 @@ import { getRandomNumber } from "./utils/randnumber";
     const { texture, label: cardLabel } = cards[i];
 
     const card = new Container();
+    const frontWrapper = new Container();
     const front = new Graphics(frontContext);
-    const back = new Graphics(backContext);
 
     const frontSprite = new Sprite(texture);
     frontSprite.anchor.set(0);
     frontSprite.x = 11;
     frontSprite.y = 11;
-    front.addChild(frontSprite);
 
-    // Allow for a random card to have the special backside.
-    const randBackNumber = getRandomNumber(1, 200);
+    frontWrapper.addChild(front);
+    frontWrapper.addChild(frontSprite);
 
+    // Randomize backside
     let backTextureImg = backTexture;
-
+    const randBackNumber = getRandomNumber(1, 200);
     if (randBackNumber === 200) {
       backTextureImg = backTextureRare;
     }
 
+    const backWrapper = new Container();
+    const back = new Graphics(backContext);
     const backSprite = new Sprite(backTextureImg);
 
-    // center the back sprite to the card
     backSprite.anchor.set(0.5);
     backSprite.x = cardWidth / 2;
     backSprite.y = cardHeight / 2;
-    back.addChild(backSprite);
 
-    // Add to card container
-    card.addChild(front);
-    card.addChild(back);
+    backWrapper.addChild(back);
+    backWrapper.addChild(backSprite);
 
-    // Start with back hidden
-    back.visible = false;
+    card.addChild(frontWrapper);
+    card.addChild(backWrapper);
+
+    backWrapper.visible = false;
 
     // Create a mask for the card avoiding image overflow - useful for the back card
     const mask = new Graphics();
@@ -146,7 +147,7 @@ import { getRandomNumber } from "./utils/randnumber";
     frontSprite.mask = frontMask;
 
     // Add the card name
-    front.addChild(frontMask);
+    frontWrapper.addChild(frontMask);
     const label = new Text({
       text: cardLabel,
       rotation: (Math.random() - 0.5) * 0.0025,
@@ -159,12 +160,12 @@ import { getRandomNumber } from "./utils/randnumber";
     label.y = cardHeight - 32;
 
     // Add the label to the card, this is deprecated in PixiJS v8, but still works, better fix this now
-    front.addChild(label);
+    frontWrapper.addChild(label);
 
     const border = new Graphics();
     border.rect(11, 11 + frontSprite.height - 2, cardWidth - 22, 2);
     border.fill(0x111222); // or whatever color you want
-    front.addChild(border);
+    frontWrapper.addChild(border);
 
     // Position the card in the grid, calculating the column and row based on the index
     const col = i % gridWidth;
@@ -249,8 +250,8 @@ import { getRandomNumber } from "./utils/randnumber";
           duration: 0.15,
           onComplete: () => {
             info.isFlipped = !info.isFlipped;
-            front.visible = !info.isFlipped;
-            back.visible = info.isFlipped;
+            frontWrapper.visible = !info.isFlipped;
+            backWrapper.visible = info.isFlipped;
 
             gsap.to(card.scale, { x: 1, duration: 0.15 });
           },
