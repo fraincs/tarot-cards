@@ -16,7 +16,7 @@ npm run install
 
 ### Todo
 
-- Adding an editorconfig file as well as ESLint would be benificial to the project as it evolves, especially if external contributors are added. [Link to issue](...)
+- Adding an editorconfig file as well as ESLint would be benificial to the project as it evolves, especially if external contributors are added. [Link to issue](https://github.com/fraincs/tarot-cards/issues/1).
 
 ### Credits
 
