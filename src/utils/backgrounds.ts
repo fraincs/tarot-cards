@@ -42,11 +42,11 @@ export function createStarField(
   for (let i = 0; i < numStars; i++) {
     const x = Math.random() * width;
     const y = Math.random() * height;
-    const radius = Math.random() * 1.5 + 0.5; // small random radius
+    const radius = Math.random() * 1.5 + 0.5;
 
-    graphics.beginFill(0xffffff, Math.random()); // white star with random opacity
-    graphics.drawCircle(x, y, radius);
-    graphics.endFill();
+    graphics
+      .fill({ color: 0xffffff, alpha: Math.random() })
+      .circle(x, y, radius);
   }
 
   return graphics;
